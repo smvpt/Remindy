@@ -1,6 +1,21 @@
-venv/
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+
+# Secrets and local data
 config.py
-reminders.db
+.env
+*.db
+*.sqlite3
+
+# OS / editors
 .DS_Store
+Thumbs.db
+.idea/
+.vscode/

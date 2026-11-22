@@ -10,36 +10,50 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# The bot's config.py lives in the project root.
+if str(BASE_DIR) not in sys.path:
+    sys.path.insert(0, str(BASE_DIR))
+
+try:
+    from config import DB_PATH
+except ImportError:  # config.py is optional for the admin panel itself
+    DB_PATH = "reminders.db"
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ktu53dc&_*51p=u^-xcvh&7*d98+pg!7pjp!e7zw5o&)=dw3xt'
+# SECURITY WARNING: set DJANGO_SECRET_KEY in production!
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-local-development-key-change-me",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 
 # Application definition
 
 INSTALLED_APPS = [
-       'jazzmin',
-       'django.contrib.admin',
-       'django.contrib.auth',
-       'django.contrib.contenttypes',
-       'django.contrib.sessions',
-       'django.contrib.messages',
-       'django.contrib.staticfiles',
-       'support',
-   ]
+    'jazzmin',  # modern admin theme
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'support',
+]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -78,7 +92,8 @@ WSGI_APPLICATION = 'bot_admin.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'reminders.db', # Мы используем твой существующий файл
+        # Same SQLite file as the bot (see DB_PATH in config.py)
+        'NAME': Path(DB_PATH) if Path(DB_PATH).is_absolute() else BASE_DIR / DB_PATH,
     }
 }
 
@@ -123,3 +138,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Remindy admin",
+    "site_header": "Remindy",
+    "site_brand": "Remindy",
+    "welcome_sign": "Remindy bot administration",
+    "icons": {
+        "support.UserQuery": "fas fa-comments",
+        "support.BotUser": "fas fa-user",
+        "support.Reminder": "fas fa-bell",
+    },
+}
